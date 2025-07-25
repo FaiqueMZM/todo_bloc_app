@@ -12,11 +12,12 @@ class TodoInitial extends TodoState {}
 
 class TodoLoaded extends TodoState {
   final List<Task> tasks;
+  final Category? filterCategory;
 
-  const TodoLoaded(this.tasks);
+  const TodoLoaded(this.tasks, {this.filterCategory});
 
   @override
-  List<Object> get props => [tasks];
+  List<Object> get props => [tasks, filterCategory ?? Object()];
 }
 
 class TodoError extends TodoState {
