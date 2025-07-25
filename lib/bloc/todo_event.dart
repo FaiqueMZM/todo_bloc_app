@@ -52,3 +52,20 @@ class FilterTasksByCategoryEvent extends TodoEvent {
   @override
   List<Object> get props => [category ?? Object()];
 }
+
+class EditTaskEvent extends TodoEvent {
+  final String id;
+  final String title;
+  final Category category;
+  final DateTime? dueDate;
+
+  const EditTaskEvent({
+    required this.id,
+    required this.title,
+    required this.category,
+    this.dueDate,
+  });
+
+  @override
+  List<Object> get props => [id, title, category, dueDate ?? Object()];
+}

@@ -15,6 +15,86 @@ class TodoScreen extends StatelessWidget {
     Category selectedCategory = Category.others;
     DateTime? selectedDate;
 
+    void showEditTaskDialog(Task task) {
+      final editController = TextEditingController(text: task.title);
+      Category editCategory = task.category;
+      DateTime? editDueDate = task.dueDate;
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Edit Task'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: editController,
+                decoration: const InputDecoration(labelText: 'Task title'),
+              ),
+              const SizedBox(height: 8),
+              DropdownButton<Category>(
+                value: editCategory,
+                isExpanded: true,
+                items: Category.values
+                    .map(
+                      (category) => DropdownMenuItem(
+                        value: category,
+                        child: Text(category.toString().split('.').last),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    editCategory = value;
+                  }
+                },
+              ),
+              TextButton(
+                onPressed: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: editDueDate ?? DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2100),
+                  );
+                  if (pickedDate != null) {
+                    editDueDate = pickedDate;
+                  }
+                },
+                child: Text(
+                  editDueDate == null
+                      ? 'Set Due Date'
+                      : DateFormat('MMM d, yyyy').format(editDueDate!),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (editController.text.isNotEmpty) {
+                  context.read<TodoBloc>().add(
+                    EditTaskEvent(
+                      id: task.id,
+                      title: editController.text,
+                      category: editCategory,
+                      dueDate: editDueDate,
+                    ),
+                  );
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('To-Do List'),
@@ -181,11 +261,20 @@ class TodoScreen extends StatelessWidget {
                               ),
                           ],
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => context.read<TodoBloc>().add(
-                            DeleteTaskEvent(task.id),
-                          ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => showEditTaskDialog(task),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () => context.read<TodoBloc>().add(
+                                DeleteTaskEvent(task.id),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
