@@ -197,6 +197,29 @@ class _TodoScreenState extends State<TodoScreen> with TickerProviderStateMixin {
       );
     }
 
+    void showDeleteConfirmationDialog(String taskId) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Delete Task'),
+          content: const Text('Are you sure you want to delete this task?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<TodoBloc>().add(DeleteTaskEvent(taskId));
+                Navigator.pop(context);
+              },
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('To-Do List'),
@@ -298,9 +321,8 @@ class _TodoScreenState extends State<TodoScreen> with TickerProviderStateMixin {
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => context.read<TodoBloc>().add(
-                            DeleteTaskEvent(task.id),
-                          ),
+                          onPressed: () =>
+                              showDeleteConfirmationDialog(task.id),
                         ),
                       ],
                     ),
