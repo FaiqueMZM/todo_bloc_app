@@ -25,83 +25,85 @@ class _TodoScreenState extends State<TodoScreen> with TickerProviderStateMixin {
 
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Add Task'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  labelText: 'Task title',
-                  border: OutlineInputBorder(),
+        builder: (context) => StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: const Text('Add Task'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  decoration: const InputDecoration(
+                    labelText: 'Task title',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              DropdownButton<Category>(
-                value: selectedCategory,
-                isExpanded: true,
-                items: Category.values
-                    .map(
-                      (category) => DropdownMenuItem(
-                        value: category,
-                        child: Text(category.toString().split('.').last),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      selectedCategory = value;
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
+                DropdownButton<Category>(
+                  value: selectedCategory,
+                  isExpanded: true,
+                  items: Category.values
+                      .map(
+                        (category) => DropdownMenuItem(
+                          value: category,
+                          child: Text(category.toString().split('.').last),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setDialogState(() {
+                        selectedCategory = value;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2100),
+                    );
+                    if (pickedDate != null) {
+                      setDialogState(() {
+                        selectedDate = pickedDate;
+                      });
+                    }
+                  },
+                  child: Text(
+                    selectedDate == null
+                        ? 'Set Due Date'
+                        : DateFormat('MMM d, yyyy').format(selectedDate!),
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
               TextButton(
-                onPressed: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(2100),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      selectedDate = pickedDate;
-                    });
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (controller.text.isNotEmpty) {
+                    context.read<TodoBloc>().add(
+                      AddTaskEvent(
+                        controller.text,
+                        category: selectedCategory,
+                        dueDate: selectedDate,
+                      ),
+                    );
+                    Navigator.pop(context);
                   }
                 },
-                child: Text(
-                  selectedDate == null
-                      ? 'Set Due Date'
-                      : DateFormat('MMM d, yyyy').format(selectedDate!),
-                  style: TextStyle(color: Theme.of(context).primaryColor),
-                ),
+                child: const Text('Add'),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (controller.text.isNotEmpty) {
-                  context.read<TodoBloc>().add(
-                    AddTaskEvent(
-                      controller.text,
-                      category: selectedCategory,
-                      dueDate: selectedDate,
-                    ),
-                  );
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
         ),
       );
     }
