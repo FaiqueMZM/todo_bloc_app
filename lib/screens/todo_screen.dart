@@ -237,6 +237,9 @@ class _TodoScreenState extends State<TodoScreen> with TickerProviderStateMixin {
           if (state is TodoInitial) {
             return const Center(child: Text('No tasks yet.'));
           } else if (state is TodoLoaded) {
+            if (state.tasks.isEmpty) {
+              return const Center(child: Text('No tasks available.'));
+            }
             return ListView.builder(
               padding: const EdgeInsets.all(8.0),
               itemCount: state.tasks.length,

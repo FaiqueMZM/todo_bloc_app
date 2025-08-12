@@ -9,7 +9,7 @@ class Task extends Equatable {
   final Category category;
   final DateTime? dueDate;
 
-  Task({
+  const Task({
     required this.id,
     required this.title,
     this.isCompleted = false,
